@@ -250,14 +250,9 @@ namespace CPUScheduler
                 selectedProcess.WaitingTime = selectedProcess.TurnaroundTime - selectedProcess.BurstTime;
             }
 
-            // Add final time marker to sequence
-            if (executionSequence.Count > 0)
-            {
-                var lastProcess = executionSequence.Last();
-                var process = processCopy.First(p => p.ID == lastProcess.Key);
-                executionSequence.Add(new KeyValuePair<int, int>(lastProcess.Key, lastProcess.Value + process.BurstTime));
-            }
-
+            // Don't duplicate the last process in the sequence
+            // Just use the sequence as is
+            
             // Print Gantt Chart
             PrintGanttChart(executionSequence);
             
@@ -278,8 +273,11 @@ namespace CPUScheduler
             foreach (var execution in executionSequence)
             {
                 int duration = execution.Value - prevTime;
-                Console.Write(new string('-', duration * 2 + 1) + "+");
-                prevTime = execution.Value;
+                if (duration > 0) // Skip zero or negative durations
+                {
+                    Console.Write(new string('-', duration * 2 + 1) + "+");
+                    prevTime = execution.Value;
+                }
             }
             
             // Print process IDs
@@ -288,8 +286,13 @@ namespace CPUScheduler
             foreach (var execution in executionSequence)
             {
                 int duration = execution.Value - prevTime;
-                Console.Write($" P{execution.Key} " + new string(' ', (duration - 1) * 2) + "|");
-                prevTime = execution.Value;
+                if (duration > 0) // Skip zero or negative durations
+                {
+                    // Make sure we don't create negative length strings
+                    int spaces = Math.Max(0, (duration - 1) * 2);
+                    Console.Write($" P{execution.Key} " + new string(' ', spaces) + "|");
+                    prevTime = execution.Value;
+                }
             }
             
             // Print bottom border
@@ -298,8 +301,11 @@ namespace CPUScheduler
             foreach (var execution in executionSequence)
             {
                 int duration = execution.Value - prevTime;
-                Console.Write(new string('-', duration * 2 + 1) + "+");
-                prevTime = execution.Value;
+                if (duration > 0) // Skip zero or negative durations
+                {
+                    Console.Write(new string('-', duration * 2 + 1) + "+");
+                    prevTime = execution.Value;
+                }
             }
             
             // Print time markers
@@ -308,8 +314,11 @@ namespace CPUScheduler
             foreach (var execution in executionSequence)
             {
                 int duration = execution.Value - prevTime;
-                Console.Write(new string(' ', duration * 2) + $"{execution.Value}");
-                prevTime = execution.Value;
+                if (duration > 0) // Skip zero or negative durations
+                {
+                    Console.Write(new string(' ', duration * 2) + $"{execution.Value}");
+                    prevTime = execution.Value;
+                }
             }
             
             Console.WriteLine();
